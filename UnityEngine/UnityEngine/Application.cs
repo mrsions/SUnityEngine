@@ -6,29 +6,15 @@ using System.Runtime.InteropServices;
 
 namespace UnityEngine
 {
-    public static class Application
+    public class Application
     {
-        private static volatile int s_InstanceIDGenerator;
+        internal static ApplicationImpl impl = null!;
 
-        internal static ApplicationWorker s_Worker = new();
+        public static string temporaryCachePath { get; internal set; } = null!;
 
-        public static string temporaryCachePath
-        {
-            get => Path.Combine(Path.GetTempPath(), Process.GetCurrentProcess().ProcessName);
-        }
-        public static string dataPath
-        {
-            get => Path.GetFullPath(".");
-        }
+        public static string dataPath { get; internal set; } = null!;
 
+        public static bool isPlaying { get => impl != null && impl.isPlaying; }
 
-        internal static int NewInstanceId()
-        {
-            return s_InstanceIDGenerator++;
-        }
-
-        public static void Run()
-        {
-        }
     }
 }

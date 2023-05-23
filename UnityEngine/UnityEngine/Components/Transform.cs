@@ -13,27 +13,75 @@ namespace UnityEngine
         //
         ///////////////////////////////////////////////////////////////////////////////////////
 
-        private List<Transform> m_Children;
+        private Vector3 m_Position;
+        private Quaternion m_Rotation;
+        private Vector3 m_Scale;
+        private Transform? m_Parent;
+        private List<Transform> m_Children = new List<Transform>();
 
-        public Vector3 position { get; set; }
-        public Vector3 localPosition { get; set; }
-
-        public Vector3 eulerAngles
+        //-- Position
+        public Vector3 localPosition
         {
-            get => rotation.eulerAngles;
-            set => rotation = Quaternion.Euler(value);
+            get => m_Position;
+            set => m_Position = value;
         }
+        public Vector3 position
+        {
+            get => localToWorldMatrix.GetPosition();
+            set => m_Position = m_Parent != null ? m_Parent.worldToLocalMatrix.MultiplyPoint(value) : value;
+        }
+
+        //-- Rotation
         public Vector3 localEulerAngles
         {
             get => localRotation.eulerAngles;
             set => localRotation = Quaternion.Euler(value);
         }
-        public Quaternion rotation { get; set; }
-        public Quaternion localRotation { get; set; }
+        public Quaternion localRotation
+        {
+            get => m_Rotation;
+            set => m_Rotation = value;
+        }
+        public Vector3 eulerAngles
+        {
+            get => rotation.eulerAngles;
+            set => rotation = Quaternion.Euler(value);
+        }
+        public Quaternion rotation
+        {
+            get
+            {
+                Quaternion result = m_Rotation;
+                Transform? parent = m_Parent;
+                while (parent != null)
+                {
+                    result = parent.m_Rotation * result;
+                    parent = parent.m_Parent;
+                }
+                return result;
+            }
+            set
+            {
+                if (m_Parent != null)
+                {
+                    value = Quaternion.Inverse(m_Parent.rotation) * value;
+                }
+                m_Rotation = value;
+            }
+        }
 
-        public Vector3 localScale { get; set; }
-        public Vector3 lossyScale { get; }
+        //-- Scale
+        public Vector3 localScale
+        {
+            get => m_Scale;
+            set => m_Scale = value;
+        }
+        public Vector3 lossyScale
+        {
+            get => localToWorldMatrix.lossyScale;
+        }
 
+        //-- Direction
         public Vector3 right
         {
             get => rotation * Vector3.right;
@@ -50,13 +98,46 @@ namespace UnityEngine
             set => rotation = Quaternion.FromToRotation(Vector3.forward, value);
         }
 
-        public Transform parent { get; set; }
-        public Transform root { get; set; }
+        public Transform? parent
+        {
+            get => m_Parent;
+            set => SetParent(m_Parent, false);
+        }
+        public Transform? root
+        {
+            get
+            {
+                Transform cursor = this;
+                while (cursor.parent != null)
+                {
+                    cursor = cursor.parent;
+                }
+                return cursor;
+            }
+        }
 
-        public Matrix4x4 localToWorldMatrix => Matrix4x4.TRS(position, rotation, localScale);
-        public Matrix4x4 worldToLocalMatrix => localToWorldMatrix.inverse;
+        public Matrix4x4 localToWorldMatrix
+        {
+            get
+            {
+                Matrix4x4 local = Matrix4x4.TRS(localPosition, localRotation, localScale);
+                if (parent != null)
+                {
+                    return parent.localToWorldMatrix * local;
+                }
+                else
+                {
+                    return local;
+                }
+            }
+        }
+        public Matrix4x4 worldToLocalMatrix
+        {
+            get => localToWorldMatrix.inverse;
+        }
 
         public bool hasChanged { get; set; }
+
         public int childCount { get => m_Children.Count; }
 
 
@@ -66,15 +147,17 @@ namespace UnityEngine
         //
         ///////////////////////////////////////////////////////////////////////////////////////
 
-        public void SetParent(Transform p, bool worldPositionStays = false)
+        public void SetParent(Transform? p, bool worldPositionStays = false)
         {
             if (worldPositionStays)
             {
-                var oldPos = position;
-                var oldRot = rotation;
+                var matrix = localToWorldMatrix;
                 SetParent(p, false);
-                position = oldPos;
-                rotation = oldRot;
+                var matrix2 = localToWorldMatrix;
+                
+                position = matrix.GetPosition();
+                rotation = matrix.rotation;
+                
             }
             else
             {
@@ -84,8 +167,17 @@ namespace UnityEngine
 
         public void SetPositionAndRotation(Vector3 position, Quaternion rotation)
         {
-            this.position = position;
-            this.rotation = rotation;
+            if (transform.parent != null)
+            {
+                var matrix = transform.parent.worldToLocalMatrix;
+                m_Position = matrix.MultiplyPoint(position);
+                m_Rotation = matrix.rotation * rotation;
+            }
+            else
+            {
+                m_Position = position;
+                m_Rotation = rotation;
+            }
         }
 
         public void Translate(Vector3 translation, Space relationTo = Space.Self)
@@ -153,7 +245,6 @@ namespace UnityEngine
             return default;
         }
 
-        public Transform GetRoot() { return default; }
         public void DetachChildren() { }
         public void SetAsFirstSibling() { }
         public void SetAsLastSibling() { }
@@ -168,7 +259,7 @@ namespace UnityEngine
             return m_Children[index];
         }
 
-        public Transform Find(string n)
+        public Transform? Find(string n)
         {
             if (n == null)
             {

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.Runtime.InteropServices;
+using UnityEngine.SceneManagement;
 
 namespace UnityEngine
 {
@@ -12,29 +13,19 @@ namespace UnityEngine
         //
         ///////////////////////////////////////////////////////////////////////////////////////
 
-        public static GameObject CreatePrimitive(PrimitiveType type)
-        {
-            return default;
-        }
-
-        public static GameObject FindWithTag(string tag)
-        {
-            return default;
-        }
-
         public static GameObject FindGameObjectWithTag(string tag)
         {
-            return default;
+            return Resources.FindGameObjectWithTag(tag);
         }
 
         public static GameObject[] FindGameObjectsWithTag(string tag)
         {
-            return default;
+            return Resources.FindGameObjectsWithTag(tag);
         }
 
         public static GameObject[] Find(string name)
         {
-            return default;
+            return Resources.FindGameObjectWithName(name);
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////
@@ -43,21 +34,35 @@ namespace UnityEngine
         //
         ///////////////////////////////////////////////////////////////////////////////////////
 
+        private bool m_Active;
+
         public GameObject gameObject => this;
 
         public Transform transform { get; internal set; }
 
-        public string tag { get; set; }
+        public string tag { get; set; } = String.Empty;
 
         public int layer { get; set; }
-        
-        public bool activeSelf { get; set; }
+
+        public bool activeSelf => m_Active;
+
+        public Scene scene { get; set; }
 
         public bool activeInHierarchy
         {
             get
             {
-                return default;
+                if (!m_Active) return false;
+
+                Transform? cursor = transform.parent;
+                while (cursor != null)
+                {
+                    if (!cursor.gameObject.m_Active) return false;
+
+                    cursor = cursor.parent;
+                }
+
+                return true;
             }
         }
 
@@ -67,9 +72,21 @@ namespace UnityEngine
         //
         ///////////////////////////////////////////////////////////////////////////////////////
 
-        public GameObject(string name = null, params Type[] components)
+        public GameObject(string? name = null, params Type[] components)
         {
+            this.name = name ?? "New Game Object";
 
+            scene = SceneManager.GetActiveScene();
+
+            foreach (var type in components)
+            {
+                Component comp = AddComponent(type);
+            }
+
+            if(transform == null)
+            {
+                transform = AddComponent<Transform>();
+            }
         }
 
         public bool CompareTag(string tag)
@@ -79,12 +96,22 @@ namespace UnityEngine
 
         public void SetActive(bool value)
         {
+            if (m_Active != value)
+            {
+                m_Active = value;
 
+                if (activeInHierarchy)
+                {
+                    while (m_Awaked.First != null)
+                    {
+                        Component comp = m_Awaked.First.Value;
+
+                        m_Awaked.RemoveFirst();
+
+                        EnsureAwake(comp);
+                    }
+                }
+            }
         }
-
-
-
-
-
     }
 }

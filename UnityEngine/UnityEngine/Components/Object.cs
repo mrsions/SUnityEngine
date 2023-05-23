@@ -1,7 +1,7 @@
 ﻿
 namespace UnityEngine
 {
-    public class Object 
+    public class Object
     {
         ///////////////////////////////////////////////////////////////////////////////////////
         //
@@ -39,7 +39,7 @@ namespace UnityEngine
 
         private bool m_Destroyed;
 
-        public string name { get; set; }
+        public string name { get; set; } = string.Empty;
 
         ///////////////////////////////////////////////////////////////////////////////////////
         //
@@ -47,9 +47,9 @@ namespace UnityEngine
         //
         ///////////////////////////////////////////////////////////////////////////////////////
 
-        public Object()
+        internal Object()
         {
-            m_InstanceId = Application.NewInstanceId();
+            m_InstanceId = Resources.NewInstanceId();
         }
 
         public int GetInstanceID()
@@ -62,7 +62,7 @@ namespace UnityEngine
             return m_InstanceId;
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return ReferenceEquals(this, obj);
         }
@@ -78,17 +78,17 @@ namespace UnityEngine
         //
         ///////////////////////////////////////////////////////////////////////////////////////
 
-        public static implicit operator bool(Object exists)
+        public static implicit operator bool(Object? exists)
         {
-            return !exists.m_Destroyed;
+            return exists != null && !exists.m_Destroyed;
         }
 
-        public static bool operator ==(Object x, Object y)
+        public static bool operator ==(Object? x, Object? y)
         {
             return ReferenceEquals(x, y);
         }
 
-        public static bool operator !=(Object x, Object y)
+        public static bool operator !=(Object? x, Object? y)
         {
             return !ReferenceEquals(x, y);
         }

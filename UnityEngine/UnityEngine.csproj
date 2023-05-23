@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\UnityEngine.Bindings\UnityEngine.Bindings.csproj" />
+    <ProjectReference Include="..\UnityEngine.Internal\UnityEngine.Internal.csproj" />
+    <ProjectReference Include="..\UnityEngine.Scripting\UnityEngine.Scripting.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1419,7 +1419,7 @@ namespace UnityEngine.Rendering
             }
         }
 
-        public override bool Equals(object other)
+        public override bool Equals(object? other)
         {
             if (!(other is VertexAttributeDescriptor)) return false;
             return Equals((VertexAttributeDescriptor)other);

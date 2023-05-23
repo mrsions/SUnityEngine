@@ -171,7 +171,7 @@ namespace UnityEngine.Rendering
             }
         }
 
-        public override bool Equals(object other)
+        public override bool Equals(object? other)
         {
             return other is SphericalHarmonicsL2 && Equals((SphericalHarmonicsL2)other);
         }

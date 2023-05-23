@@ -144,13 +144,13 @@ namespace UnityEngine
 
         // Returns a nicely formatted string for this vector.
         [MethodImpl(MethodImplOptionsEx.AggressiveInlining)]
-        public string ToString(string format)
+        public string ToString(string? format)
         {
             return ToString(format, null);
         }
 
         [MethodImpl(MethodImplOptionsEx.AggressiveInlining)]
-        public string ToString(string format, IFormatProvider formatProvider)
+        public string ToString(string? format, IFormatProvider? formatProvider)
         {
             if (string.IsNullOrEmpty(format))
                 format = "F2";
@@ -168,7 +168,7 @@ namespace UnityEngine
 
         // also required for being able to use Vector2s as keys in hash tables
         [MethodImpl(MethodImplOptionsEx.AggressiveInlining)]
-        public override bool Equals(object other)
+        public override bool Equals(object? other)
         {
             if (!(other is Vector2)) return false;
 

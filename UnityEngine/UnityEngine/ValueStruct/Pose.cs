@@ -21,7 +21,7 @@ namespace UnityEngine
             return UnityString.Format("({0}, {1})", position.ToString(), rotation.ToString());
         }
 
-        public string ToString(string format)
+        public string ToString(string? format)
         {
             return UnityString.Format("({0}, {1})", position.ToString(format), rotation.ToString(format));
         }
@@ -67,7 +67,7 @@ namespace UnityEngine
                 return k_Identity;
             }
         }
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (!(obj is Pose))
                 return false;

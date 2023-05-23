@@ -53,13 +53,13 @@ namespace UnityEngine
 
         // Returns a nicely formatted string of this color.
         [MethodImpl(MethodImplOptionsEx.AggressiveInlining)]
-        public string ToString(string format)
+        public string ToString(string? format)
         {
             return ToString(format, null);
         }
 
         [MethodImpl(MethodImplOptionsEx.AggressiveInlining)]
-        public string ToString(string format, IFormatProvider formatProvider)
+        public string ToString(string? format, IFormatProvider? formatProvider)
         {
             if (string.IsNullOrEmpty(format))
                 format = "F3";
@@ -75,7 +75,7 @@ namespace UnityEngine
         }
 
         // also required for being able to use Colors as keys in hash tables
-        public override bool Equals(object other)
+        public override bool Equals(object? other)
         {
             if (!(other is Color)) return false;
 
